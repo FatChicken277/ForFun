@@ -1,0 +1,83 @@
+#!/usr/bin/python3
+"""This module contains a some funtions that do git add and commit"""
+import sys
+import subprocess
+
+"""FONT COLORS AND STYLES"""
+
+COLORS = {
+    "red": "\033[91m",
+    "green": "\033[38;5;28m"
+}
+
+STYLES = {
+    "bold": "\033[1m",
+    "reset": "\033[0m",
+    "clear": chr(27)+'[2j' + '\033c' + '\x1bc'
+}
+
+
+def PrintUsage():
+    """PRINT USAGE"""
+
+    print("\n{}{}Usage:\n\t./FastCommit [ def | commit ] [files]{}\n".format(
+        STYLES["bold"], COLORS["red"], STYLES["reset"]))
+
+
+def SubProcess(cmd, flag=""):
+    """SUB PROCESS"""
+
+    ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT)
+    msg = ps.communicate()[0].decode("utf-8")
+    if flag == "print":
+        print("{}{}{}{}".format(STYLES["bold"], COLORS["green"],
+                                msg, STYLES["reset"]))
+    return msg
+
+
+def GitScript(args):
+    """GIT ADD AND COMMIT"""
+
+    print("{}FastCommit »»———————► 🐓{}\n".format(
+        STYLES["bold"], STYLES["reset"]))
+    print("="*50)
+
+    if len(args) < 2:
+        PrintUsage()
+        return
+
+    a = 0
+    commit = args[0]
+    files = args[1:]
+
+    if commit == "def":
+        a = 1
+    dont_found = 1
+    for file in files:
+        cmd = "git status -s . | grep {} | cut -d {} -f2".format(file, '" "')
+        output = SubProcess(cmd)
+        if output == "":
+            continue
+        else:
+            dont_found = 0
+            cmd = "git add {}".format(file)
+            SubProcess(cmd, "print")
+            if a == 0:
+                cmd = "git commit -m '{}'".format(commit)
+                SubProcess(cmd, "print")
+            else:
+                cmd = "git commit -m 'added {} file'".format(file)
+                SubProcess(cmd, "print")
+    if dont_found == 1:
+        print("\n{}{}File dont exist or cannont be added{}\n".format(
+            STYLES["bold"], COLORS["red"], STYLES["reset"]))
+
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    print(STYLES["clear"])
+    GitScript(args)
+    print("="*50)
+    print("\n{}Developed by FatChicken277{}\n".format(
+        STYLES["bold"], STYLES["reset"]))
